@@ -1,6 +1,6 @@
 # Reusable Spring Boot Backend Template
 
-A production-oriented Java 21 backend starter for REST APIs. It includes JWT authentication, role-based authorization, PostgreSQL, Flyway, standardized responses, validation, OpenAPI, auditing, tests, Docker, and environment-specific configuration.
+A production-oriented Java 21 backend starter for REST APIs. It includes JWT authentication, role-based authorization, Oracle Database, Flyway, standardized responses, validation, OpenAPI, auditing, tests, Docker, and environment-specific configuration.
 
 ## Technology stack
 
@@ -8,7 +8,7 @@ A production-oriented Java 21 backend starter for REST APIs. It includes JWT aut
 - Spring Boot 4.1.0
 - Spring Web MVC, Spring Data JPA, Spring Security, Bean Validation
 - JWT access tokens with hashed, rotating opaque refresh tokens
-- PostgreSQL for development/production and H2 for automated tests
+- Oracle Database 23ai+ for development/production and H2 in Oracle mode for fast automated tests
 - Flyway database migrations
 - springdoc-openapi 3.0.3 and Swagger UI
 - Lombok and MapStruct
@@ -55,20 +55,20 @@ src/main/java/com/example/template
 
 - JDK 21
 - Maven 3.9+
-- Docker and Docker Compose for PostgreSQL or the complete containerized stack
+- Docker and Docker Compose for Oracle Database Free or the complete containerized stack
 
 ## Run locally
 
-Start only PostgreSQL:
+Start only Oracle Database Free:
 
 ```bash
-docker compose up -d postgres
+docker compose up -d oracle
 mvn spring-boot:run
 ```
 
 The `dev` profile is active by default and uses:
 
-- Database: `jdbc:postgresql://localhost:5432/template_db`
+- Database: `jdbc:oracle:thin:@//localhost:1521/FREEPDB1`
 - Username: `template_user`
 - Password: `template_password`
 - Server: `http://localhost:8080`
@@ -101,8 +101,8 @@ docker compose down -v
 
 ## Profiles
 
-- `dev`: PostgreSQL with local defaults and verbose application logging.
-- `test`: H2 in PostgreSQL compatibility mode; used by unit/API integration tests.
+- `dev`: Oracle Database 23ai+ with local defaults and verbose application logging.
+- `test`: H2 in Oracle compatibility mode; used by unit/API integration tests.
 - `prod`: requires database credentials, JWT secret, and CORS origins from the environment. Swagger is disabled unless explicitly enabled.
 
 Select a profile with:
@@ -117,10 +117,14 @@ SPRING_PROFILES_ACTIVE=prod java -jar target/template-backend-0.0.1-SNAPSHOT.jar
 |---|---|---|
 | `SPRING_PROFILES_ACTIVE` | Active Spring profile | `dev` |
 | `SERVER_PORT` | HTTP port | `8080` |
-| `DB_URL` | JDBC URL | Local PostgreSQL URL |
+| `DB_URL` | Oracle JDBC URL | Local `FREEPDB1` service |
 | `DB_USERNAME` | Database username | `template_user` |
 | `DB_PASSWORD` | Database password | `template_password` |
 | `DB_POOL_SIZE` | Maximum Hikari pool size | Profile-specific |
+| `ORACLE_PASSWORD` | Docker Oracle `SYS`/`SYSTEM` password | Local-only Compose default |
+| `ORACLE_APP_USER` | Docker application schema user | `template_user` |
+| `ORACLE_APP_PASSWORD` | Docker application schema password | `template_password` |
+| `ORACLE_PORT` | Docker Oracle listener port | `1521` |
 | `JWT_SECRET` | Base64 HMAC key, at least 32 decoded bytes | Development-only key |
 | `JWT_ACCESS_EXPIRATION` | Access-token lifetime | `15m` |
 | `JWT_REFRESH_EXPIRATION` | Refresh-token lifetime | `7d` |
@@ -240,13 +244,15 @@ Stack traces and internal exception details are never returned to clients. Every
 
 ## Database migrations
 
-Flyway migrations live in `src/main/resources/db/migration`. `V1__create_initial_schema.sql` creates:
+Oracle Flyway migrations live in `src/main/resources/db/migration/oracle`; H2 test migrations live in `src/main/resources/db/migration/h2`. `V1__create_initial_schema.sql` creates:
 
 - `users`
 - `roles`
 - `user_roles`
 - `refresh_tokens`
 - Default `ADMIN` and `USER` roles
+
+The Oracle schema uses native `BOOLEAN`, so the supported database baseline is Oracle Database 23ai or newer.
 
 Add schema changes as new immutable versioned migrations, for example:
 
@@ -276,7 +282,7 @@ The suite includes:
 
 - Mockito unit tests for authentication and user services
 - MockMvc integration tests for registration, login, validation, JWT-protected access, and authorization
-- A PostgreSQL Testcontainers startup/migration test, automatically skipped when Docker is unavailable
+- An Oracle Database Free 23ai Testcontainers startup/migration test, automatically skipped when Docker is unavailable
 
 ## Code conventions
 

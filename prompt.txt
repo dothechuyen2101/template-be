@@ -11,8 +11,8 @@ Yêu cầu công nghệ:
 - Spring Data JPA.
 - Spring Security.
 - JWT Authentication.
-- PostgreSQL làm database chính.
-- H2 database cho test/local nhanh nếu cần.
+- Oracle Database 23ai trở lên làm database chính.
+- H2 database ở Oracle compatibility mode cho test/local nhanh nếu cần.
 - Flyway để quản lý database migration.
 - springdoc-openapi để tích hợp Swagger UI/OpenAPI.
 - Lombok.
@@ -84,8 +84,8 @@ Các chức năng bắt buộc:
 - API lấy thông tin người dùng hiện tại.
 
 3. Database
-- Dùng PostgreSQL.
-- Có file docker-compose.yml để chạy PostgreSQL.
+- Dùng Oracle Database 23ai trở lên.
+- Có file docker-compose.yml để chạy Oracle Database Free.
 - Có Flyway migration ban đầu:
   - tạo bảng users
   - tạo bảng roles
@@ -179,8 +179,7 @@ Với lỗi:
 
 12. Docker
 - docker-compose.yml gồm:
-  - PostgreSQL
-  - optional: pgAdmin nếu phù hợp
+  - Oracle Database Free
 - Dockerfile cho Spring Boot app.
 - Hướng dẫn chạy bằng Docker Compose.
 
@@ -242,7 +241,7 @@ Yêu cầu output:
 Tiêu chí nghiệm thu:
 - Chạy được `mvn clean test`.
 - Chạy được `mvn spring-boot:run` với profile dev.
-- Chạy được PostgreSQL bằng `docker compose up -d`.
+- Chạy được Oracle Database Free bằng `docker compose up -d oracle`.
 - Truy cập được Swagger UI.
 - Đăng ký user thành công.
 - Đăng nhập nhận JWT thành công.

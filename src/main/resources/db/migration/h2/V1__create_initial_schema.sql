@@ -13,7 +13,7 @@ CREATE TABLE users (
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     full_name VARCHAR(150) NOT NULL,
-    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    enabled BOOLEAN DEFAULT TRUE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
     created_by VARCHAR(100) NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE user_roles (
     role_id BIGINT NOT NULL,
     PRIMARY KEY (user_id, role_id),
     CONSTRAINT fk_user_roles_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-    CONSTRAINT fk_user_roles_role FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE RESTRICT
+    CONSTRAINT fk_user_roles_role FOREIGN KEY (role_id) REFERENCES roles (id)
 );
 
 CREATE TABLE refresh_tokens (
@@ -33,7 +33,7 @@ CREATE TABLE refresh_tokens (
     token_hash VARCHAR(64) NOT NULL UNIQUE,
     user_id BIGINT NOT NULL,
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    revoked BOOLEAN NOT NULL DEFAULT FALSE,
+    revoked BOOLEAN DEFAULT FALSE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
     created_by VARCHAR(100) NOT NULL,
@@ -41,12 +41,11 @@ CREATE TABLE refresh_tokens (
     CONSTRAINT fk_refresh_tokens_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_users_username ON users (username);
-CREATE INDEX idx_users_email ON users (email);
 CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens (user_id);
 CREATE INDEX idx_refresh_tokens_expires_at ON refresh_tokens (expires_at);
 
 INSERT INTO roles (name, created_at, updated_at, created_by, updated_by)
-VALUES
-    ('ADMIN', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'flyway', 'flyway'),
-    ('USER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'flyway', 'flyway');
+VALUES ('ADMIN', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'flyway', 'flyway');
+
+INSERT INTO roles (name, created_at, updated_at, created_by, updated_by)
+VALUES ('USER', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'flyway', 'flyway');
