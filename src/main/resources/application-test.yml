@@ -1,0 +1,35 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:template_test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    show-sql: false
+  flyway:
+    clean-disabled: false
+
+app:
+  security:
+    jwt:
+      secret: dGVzdC1vbmx5LXNlY3JldC1rZXktbXVzdC1iZS1hdC1sZWFzdC0zMi1ieXRlcy1sb25n
+      access-token-expiration: 5m
+      refresh-token-expiration: 1h
+      issuer: template-backend-test
+    cors:
+      allowed-origins:
+        - http://localhost
+  bootstrap:
+    admin:
+      enabled: false
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+logging:
+  level:
+    root: WARN
+    com.example.template: INFO

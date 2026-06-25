@@ -1,0 +1,260 @@
+Bạn là một Senior Java Backend Engineer. Hãy xây dựng cho tôi một template backend dùng Java Spring Boot có thể tái sử dụng cho nhiều dự án sau này.
+
+Mục tiêu:
+Tạo một project backend hoàn chỉnh, sạch, dễ mở rộng, có đầy đủ các component thường dùng trong dự án thực tế: REST API, database, authentication, authorization, Swagger/OpenAPI, migration, logging, exception handling, validation, testing, Docker, cấu hình môi trường, và tài liệu hướng dẫn chạy project.
+
+Yêu cầu công nghệ:
+- Java 21.
+- Spring Boot phiên bản ổn định mới nhất tương thích tốt với các dependency.
+- Maven hoặc Gradle, ưu tiên Maven nếu không có lý do đặc biệt.
+- Spring Web.
+- Spring Data JPA.
+- Spring Security.
+- JWT Authentication.
+- PostgreSQL làm database chính.
+- H2 database cho test/local nhanh nếu cần.
+- Flyway để quản lý database migration.
+- springdoc-openapi để tích hợp Swagger UI/OpenAPI.
+- Lombok.
+- MapStruct nếu phù hợp.
+- Bean Validation.
+- Docker và Docker Compose.
+- JUnit 5, Mockito, Testcontainers nếu phù hợp.
+- Actuator cho health check.
+- Cấu hình theo profile: dev, test, prod.
+
+Yêu cầu kiến trúc:
+Hãy thiết kế theo kiến trúc rõ ràng, dễ bảo trì. Có thể dùng layered architecture hoặc modular monolith. Cấu trúc package đề xuất:
+
+src/main/java/com/example/template
+├── common
+│   ├── config
+│   ├── constants
+│   ├── exception
+│   ├── response
+│   ├── security
+│   └── util
+├── modules
+│   ├── auth
+│   │   ├── controller
+│   │   ├── dto
+│   │   ├── service
+│   │   └── mapper
+│   ├── user
+│   │   ├── controller
+│   │   ├── dto
+│   │   ├── entity
+│   │   ├── repository
+│   │   ├── service
+│   │   └── mapper
+│   └── role
+│       ├── entity
+│       └── repository
+└── TemplateApplication.java
+
+Các chức năng bắt buộc:
+1. Authentication và Authorization
+- API đăng ký tài khoản.
+- API đăng nhập.
+- Sinh access token bằng JWT.
+- Có refresh token nếu thiết kế phù hợp.
+- Mã hóa password bằng BCrypt.
+- Phân quyền theo role: ADMIN, USER.
+- Một số endpoint public và một số endpoint cần authentication.
+- Ví dụ:
+  - POST /api/v1/auth/register
+  - POST /api/v1/auth/login
+  - POST /api/v1/auth/refresh-token nếu có refresh token
+  - GET /api/v1/users/me
+  - GET /api/v1/admin/users chỉ ADMIN được truy cập
+
+2. User management
+- Entity User gồm tối thiểu:
+  - id
+  - username
+  - email
+  - password
+  - fullName
+  - enabled
+  - createdAt
+  - updatedAt
+- Entity Role.
+- Quan hệ User - Role phù hợp.
+- CRUD user cơ bản cho ADMIN.
+- API lấy thông tin người dùng hiện tại.
+
+3. Database
+- Dùng PostgreSQL.
+- Có file docker-compose.yml để chạy PostgreSQL.
+- Có Flyway migration ban đầu:
+  - tạo bảng users
+  - tạo bảng roles
+  - tạo bảng user_roles
+  - insert role mặc định ADMIN, USER
+  - có thể tạo user admin mặc định nếu phù hợp
+- Không hard-code thông tin database trong code, dùng biến môi trường hoặc application.yml.
+
+4. API response chuẩn hóa
+Tạo cấu trúc response thống nhất, ví dụ:
+{
+  "success": true,
+  "message": "OK",
+  "data": {},
+  "errors": null,
+  "timestamp": "..."
+}
+
+Với lỗi:
+{
+  "success": false,
+  "message": "Validation failed",
+  "data": null,
+  "errors": [
+    {
+      "field": "email",
+      "message": "Email is invalid"
+    }
+  ],
+  "timestamp": "..."
+}
+
+5. Exception handling
+- GlobalExceptionHandler dùng @RestControllerAdvice.
+- Xử lý các lỗi:
+  - validation error
+  - unauthorized
+  - forbidden
+  - not found
+  - duplicate resource
+  - business exception
+  - internal server error
+- Không expose stack trace ra client.
+
+6. Validation
+- Dùng Jakarta Bean Validation.
+- Validate request DTO:
+  - email đúng định dạng
+  - password tối thiểu 8 ký tự
+  - username không rỗng
+  - các field bắt buộc
+
+7. Swagger/OpenAPI
+- Tích hợp springdoc-openapi.
+- Swagger UI chạy được.
+- Cấu hình title, description, version.
+- Có Bearer JWT security scheme để test API bảo mật trực tiếp trên Swagger.
+- Tất cả controller có mô tả API rõ ràng bằng annotation OpenAPI nếu cần.
+
+8. Logging
+- Có logging chuẩn bằng SLF4J.
+- Log request quan trọng, lỗi hệ thống.
+- Không log password/token nhạy cảm.
+- Có thể thêm request correlation id nếu phù hợp.
+
+9. Audit fields
+- Entity base có:
+  - createdAt
+  - updatedAt
+  - createdBy nếu phù hợp
+  - updatedBy nếu phù hợp
+- Dùng JPA Auditing.
+
+10. Pagination và filtering
+- API list user hỗ trợ pagination:
+  - page
+  - size
+  - sort
+  - keyword nếu phù hợp
+- Response trả metadata:
+  - page
+  - size
+  - totalElements
+  - totalPages
+
+11. Testing
+- Viết unit test cho service auth/user.
+- Viết integration test cho một số API chính nếu phù hợp.
+- Test đăng ký, đăng nhập, truy cập endpoint cần JWT.
+- Dùng test profile riêng.
+
+12. Docker
+- docker-compose.yml gồm:
+  - PostgreSQL
+  - optional: pgAdmin nếu phù hợp
+- Dockerfile cho Spring Boot app.
+- Hướng dẫn chạy bằng Docker Compose.
+
+13. Cấu hình môi trường
+Tạo các file:
+- application.yml
+- application-dev.yml
+- application-test.yml
+- application-prod.yml
+
+Các cấu hình quan trọng:
+- server port
+- datasource
+- JPA
+- Flyway
+- JWT secret
+- JWT expiration
+- Swagger
+- Logging
+- Actuator
+
+Không commit secret thật. Dùng biến môi trường với giá trị mặc định an toàn cho local.
+
+14. Documentation
+Tạo README.md đầy đủ gồm:
+- Giới thiệu project.
+- Tech stack.
+- Cấu trúc thư mục.
+- Cách chạy local.
+- Cách chạy bằng Docker.
+- Cách truy cập Swagger.
+- Cách cấu hình biến môi trường.
+- API mẫu.
+- Tài khoản mặc định nếu có.
+- Cách chạy test.
+- Quy ước code.
+- Hướng dẫn tái sử dụng template cho dự án mới.
+
+15. Code quality
+- Code rõ ràng, dễ đọc, production-ready.
+- Không tạo code thừa.
+- Không để TODO quan trọng chưa xử lý.
+- Dùng DTO, không trả thẳng Entity ra API.
+- Dùng mapper để convert Entity <-> DTO.
+- Service chứa business logic, controller mỏng.
+- Repository chỉ xử lý truy vấn database.
+- Tách request DTO và response DTO.
+- Không hard-code string lỗi lung tung, gom message/constants nếu phù hợp.
+- Tuân thủ RESTful convention.
+
+Yêu cầu output:
+- Tạo toàn bộ mã nguồn project.
+- Giải thích ngắn gọn các thành phần chính sau khi tạo.
+- Liệt kê các lệnh để chạy project.
+- Liệt kê các endpoint chính.
+- Đảm bảo project build được.
+- Nếu có lựa chọn kỹ thuật nào cần quyết định, hãy chọn phương án phù hợp nhất cho template backend tái sử dụng và giải thích ngắn gọn lý do.
+
+Tiêu chí nghiệm thu:
+- Chạy được `mvn clean test`.
+- Chạy được `mvn spring-boot:run` với profile dev.
+- Chạy được PostgreSQL bằng `docker compose up -d`.
+- Truy cập được Swagger UI.
+- Đăng ký user thành công.
+- Đăng nhập nhận JWT thành công.
+- Dùng JWT truy cập được endpoint protected.
+- User thường không truy cập được endpoint ADMIN.
+- Migration Flyway chạy tự động.
+- README hướng dẫn đầy đủ.
+
+Trước khi code, hãy lập kế hoạch ngắn gọn gồm:
+1. Danh sách dependency sẽ dùng.
+2. Cấu trúc thư mục.
+3. Luồng authentication.
+4. Danh sách file chính sẽ tạo.
+
+Sau đó hãy triển khai từng phần. Khi hoàn thành, hãy tự kiểm tra lại toàn bộ project theo tiêu chí nghiệm thu.

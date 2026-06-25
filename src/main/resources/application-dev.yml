@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/template_db}
+    username: ${DB_USERNAME:template_user}
+    password: ${DB_PASSWORD:template_password}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+      minimum-idle: 2
+  jpa:
+    show-sql: false
+
+logging:
+  level:
+    com.example.template: DEBUG
